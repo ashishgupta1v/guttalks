@@ -32,6 +32,8 @@ const allowedOrigins = [
   "http://localhost:3000" // Local testing ke liye
 ];
 
+app.options("*", cors());
+
 app.use(cors({
   origin: function (origin, callback) {
     // allow requests with no origin (like mobile apps or curl requests)
