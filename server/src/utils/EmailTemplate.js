@@ -154,8 +154,8 @@ export const sendOrderStatusEmail = async (userEmail, orderDetails) => {
         Total Paid: ₹${totalAmount?.toFixed(2) || '0'}
       </div>
       
-      <div style="text-align: center;">
-        <a href="${process.env.FRONTEND_URL}/orders/${orderId}" class="btn">View Order Details</a>
+      <div style="text-align: center; color: "white">
+        <a href="${process.env.FRONTEND_URL}/dashboard" class="btn">View Order Details</a>
       </div>
       <p style="font-size: 12px; margin-top: 20px;">If you have any questions, please contact us at hello@guttalks.in</p>
     </div>
@@ -441,7 +441,7 @@ export const sendBookingConfirmationEmail = async (userEmail, bookingDetails) =>
       </ul>
       
       <p><strong>Need to reschedule?</strong><br/>
-      You can manage your booking from your <a href="${process.env.FRONTEND_URL}/dashboard" style="color:#18606D;">dashboard</a>. Changes require at least 24 hours notice.</p>
+      You can manage your booking from your <a href="${process.env.FRONTEND_URL}/dashboard" style="color:white;">dashboard</a>. Changes require at least 24 hours notice.</p>
       
       <div style="text-align: center; margin: 20px 0;">
         <a href="#" class="download-btn" style="background-color: #2A7F8F;">⬇️ Download Invoice (PDF)</a>

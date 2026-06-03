@@ -6,11 +6,9 @@ const transporter = nodemailer.createTransport({
   secure: true,
   auth: {
     user: "help@guttalks.in",
-    pass: process.env.EMAIL_PASS
+    pass: process.env.EMAIL_PASS || "GutTalks@123"
   },
-  tls: {
-    rejectUnauthorized: false, // important for some Hostinger setups
-  },
+ 
 });
 
 

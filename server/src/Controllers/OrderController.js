@@ -6,6 +6,7 @@ import User from '../Models/User.js';
 import { createShiprocketOrder, assignAWB, trackShipment, getAWBFromOrder } from '../services/shipRocketServices.js';
 import mongoose from 'mongoose';
 import console from 'console';
+import { sendOrderStatusEmail } from '../utils/EmailTemplate.js';
 
 export const createOrder = async (req, res) => {
   
@@ -218,6 +219,35 @@ if (paymentMethod === "online") {
     }
 
     await session.commitTransaction();
+   
+try {
+  // Determine recipient email
+  let userEmail = null;
+  if (user && user.email) {
+    userEmail = user.email;
+  } else if (shippingAddress && shippingAddress.email) {
+    userEmail = shippingAddress.email;
+  }
+
+  if (userEmail) {
+    await sendOrderStatusEmail(userEmail, {
+      orderId: newOrder._id.toString(),
+      status: "Order Placed",
+      customStatus: newOrder.customStatus,
+      items: orderItems.map(item => ({
+        product: { name: item.name },
+        quantity: item.quantity,
+        price: item.priceAtPurchase
+      })),
+      totalAmount: newOrder.totalAmount,
+      shippingAddress: newOrder.shippingAddress,
+      updatedAt: newOrder.createdAt
+    });
+  }
+} catch (emailErr) {
+  console.error("Failed to send order confirmation email:", emailErr.message);
+  // Do not break the order flow
+}
     session.endSession();
 
     return res.status(201).json({
@@ -418,6 +448,39 @@ export const updateOrderStatus = async (req, res) => {
     
     
     await order.save();
+     try {
+      // Get user email: either from associated user or shippingAddress
+      let userEmail = null;
+      if (order.userId) {
+        const user = await User.findById(order.userId).select('email');
+        if (user) userEmail = user.email;
+      }
+      if (!userEmail && order.shippingAddress && order.shippingAddress.email) {
+        userEmail = order.shippingAddress.email;
+      }
+
+      if (userEmail) {
+        // Prepare items for email template
+        const emailItems = order.items.map(item => ({
+          product: { name: item.name },
+          quantity: item.quantity,
+          price: item.priceAtPurchase
+        }));
+
+        await sendOrderStatusEmail(userEmail, {
+          orderId: order._id.toString(),
+          status: customStatus,          // main status
+          customStatus: customStatus,
+          items: emailItems,
+          totalAmount: order.totalAmount,
+          shippingAddress: order.shippingAddress,
+          updatedAt: order.customStatusUpdatedAt
+        });
+      }
+    } catch (emailErr) {
+      console.error("Failed to send order status update email:", emailErr.message);
+      // Do not break the API response
+    }
     
     res.json({ success: true, order });
   } catch (error) {

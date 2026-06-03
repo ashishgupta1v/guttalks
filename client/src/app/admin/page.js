@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
@@ -9,7 +10,6 @@ import { PageLoader } from "./components/Loading";
 import CallSlotManagement from "./components/CallSlotManagement";
 import Booking from "./components/Booking";
 import OrdersTab from "./components/OrdersTab";
-import { actionAsyncStorage } from "next/dist/server/app-render/action-async-storage.external";
 import CouponsTab from "./components/CouponsTab";
 import ContactTab from "./components/ContactTab";
 
@@ -26,11 +26,27 @@ export default function AdminPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
+    // Check for admin token
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      router.push('/admin/login');
+      return;
+    }
+    setIsAuthenticated(true);
     setTimeout(() => setLoading(false), 800);
-  }, []);
+  }, [router]);
 
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminInfo');
+    router.push('/admin/login');
+  };
+
+  if (!isAuthenticated) return <PageLoader />;
   if (loading) return <PageLoader />;
 
   return (
@@ -54,6 +70,7 @@ export default function AdminPage() {
             setSearchTerm={setSearchTerm}
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}
+            onLogout={handleLogout}
           />
           <div className="p-6">
             <AnimatePresence mode="wait">
@@ -66,11 +83,11 @@ export default function AdminPage() {
               >
                 {activeTab === "dashboard" && <Dashboard stats={dummyStats} />}
                 {activeTab === "products" && <ProductManagement searchTerm={searchTerm} />}
-                {activeTab === "availability" && <CallSlotManagement/>}
-                {activeTab === "bookings" && <Booking/>}
-                {activeTab === "orders" && <OrdersTab/>}
-                {activeTab === "coupon" && <CouponsTab/>}
-                {activeTab === "contact" && <ContactTab/>}
+                {activeTab === "availability" && <CallSlotManagement />}
+                {activeTab === "bookings" && <Booking />}
+                {activeTab === "orders" && <OrdersTab />}
+                {activeTab === "coupon" && <CouponsTab />}
+                {activeTab === "contact" && <ContactTab />}
               </motion.div>
             </AnimatePresence>
           </div>

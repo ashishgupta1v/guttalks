@@ -86,6 +86,7 @@ app.use("/api/auth", UserRoutes);
 app.use("/api/user-interests", IntrestedRoutes);
 app.use("/api/product", ProductRoutes);
 app.use("/api/order", orderRoutes);
+
 app.use("/api/coupon", couponRoutes);
 app.use("/api/shipping", shippingRoutes);
 app.use("/api/payment", paymentRoutes);
