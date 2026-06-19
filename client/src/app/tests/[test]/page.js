@@ -731,7 +731,7 @@ export default function GutHealthTestPage() {
                   src={mainImage}
                   alt={`${currentTest.name} test`}
                   fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="object-contain p-4 transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute top-3 right-3 bg-white/80 backdrop-blur rounded-full p-1.5 shadow-md">
                   <ZoomIn size={18} className="text-[#18606D]" />
@@ -747,7 +747,7 @@ export default function GutHealthTestPage() {
                     mainImage === img ? "border-[#18606D] shadow-md" : "border-[#D9EEF2] opacity-70"
                   }`}
                 >
-                  <Image src={img} alt={`Thumb ${idx}`} width={80} height={80} className="object-cover" />
+                  <Image src={img} alt={`Thumb ${idx}`} width={80} height={80} className="object-contain p-1" />
                 </button>
               ))}
             </div>
@@ -761,13 +761,24 @@ export default function GutHealthTestPage() {
             <p className="text-[#18606D] text-sm font-medium mt-2 flex items-center gap-2">
               <Shield size={14} /> At-home sample collection | No fasting | 20 Min Expert consultation included | NABL Certified Lab
             </p>
-            <div className="mt-4 flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-[#18606D]">₹{currentTest.price}</span>
-              <span className="text-sm text-[#94A3B8] line-through">₹{currentTest.fullPrice}</span>
-              <span className="text-xs bg-[#E8F4F7] text-[#18606D] px-2 py-0.5 rounded-full">
-                Save {Math.round(((currentTest.fullPrice - currentTest.price) / currentTest.fullPrice) * 100)}%
-              </span>
-            </div>
+            {(() => {
+              const hasDiscount = currentTest.fullPrice && currentTest.price && (currentTest.price < currentTest.fullPrice);
+              return (
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span className="text-3xl font-bold text-[#18606D]">
+                    ₹{hasDiscount ? currentTest.price : (currentTest.fullPrice || currentTest.price)}
+                  </span>
+                  {hasDiscount && (
+                    <>
+                      <span className="text-sm text-[#94A3B8] line-through">₹{currentTest.fullPrice}</span>
+                      <span className="text-xs bg-[#E8F4F7] text-[#18606D] px-2 py-0.5 rounded-full">
+                        Save {Math.round(((currentTest.fullPrice - currentTest.price) / currentTest.fullPrice) * 100)}%
+                      </span>
+                    </>
+                  )}
+                </div>
+              );
+            })()}
             <p className="text-xs text-[#64748B] mt-1">{currentTest.taxNote}</p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">

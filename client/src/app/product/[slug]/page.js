@@ -435,8 +435,10 @@ export default function ProductPage() {
         <div className="flex flex-wrap gap-3">
           {options.map((opt, idx) => {
             const isSelected = selected === opt;
-            const discountPercent = Math.round(((opt.originalPrice - opt.salePrice) / opt.originalPrice) * 100);
-            const perUnitPrice = (opt.salePrice / (type === 'pack' ? (opt.name.includes('Pack of') ? parseInt(opt.name.split(' ')[2]) : 1) : 1)).toFixed(0);
+            const hasOptDiscount = opt[originalPriceKey] && opt[priceKey] && opt[originalPriceKey] > opt[priceKey];
+            const discountPercent = hasOptDiscount ? Math.round(((opt[originalPriceKey] - opt[priceKey]) / opt[originalPriceKey]) * 100) : 0;
+            const priceVal = opt[priceKey] || opt[originalPriceKey];
+            const perUnitPrice = (priceVal / (type === 'pack' ? (opt.name.includes('Pack of') ? parseInt(opt.name.split(' ')[2]) : 1) : 1)).toFixed(0);
             return (
               <button
                 key={idx}
@@ -453,9 +455,15 @@ export default function ProductPage() {
                   </span>
                 )}
                 <div className="font-semibold text-[#1A4D3E]">{opt[labelKey]}</div>
-                <div className="text-xs text-[#64748B] line-through">₹{opt[originalPriceKey]}</div>
-                <div className="text-lg font-bold text-[#18606D]">₹{opt[priceKey]}</div>
-                <div className="text-[10px] text-green-600">Save {discountPercent}%</div>
+                {hasOptDiscount ? (
+                  <>
+                    <div className="text-xs text-[#64748B] line-through">₹{opt[originalPriceKey]}</div>
+                    <div className="text-lg font-bold text-[#18606D]">₹{opt[priceKey]}</div>
+                    <div className="text-[10px] text-green-600">Save {discountPercent}%</div>
+                  </>
+                ) : (
+                  <div className="text-lg font-bold text-[#18606D]">₹{priceVal}</div>
+                )}
                 <div className="text-[10px] text-[#64748B]">₹{perUnitPrice}/{type === 'duration' ? 'mo' : 'kit'}</div>
               </button>
             );
@@ -477,13 +485,15 @@ export default function ProductPage() {
                 src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${mainImage}`}
                 alt={product.name}
                 fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                className="object-contain p-4 transition-transform duration-500 group-hover:scale-105"
                 unoptimized
                 loading="eager"
               />
-              <div className="absolute top-3 left-3 backdrop-blur-md bg-red-500/90 text-white px-2 py-0.5 rounded-full text-xs font-bold shadow-lg">
-                -{Math.round(((product.originalPrice - product.salePrice) / product.originalPrice) * 100)}%
-              </div>
+              {product.originalPrice && product.salePrice && product.originalPrice > product.salePrice && (
+                <div className="absolute top-3 left-3 backdrop-blur-md bg-red-500/90 text-white px-2 py-0.5 rounded-full text-xs font-bold shadow-lg">
+                  -{Math.round(((product.originalPrice - product.salePrice) / product.originalPrice) * 100)}%
+                </div>
+              )}
               {isTestProduct && (
                 <div className="absolute top-3 right-3 backdrop-blur-md bg-[#18606D]/90 text-white px-2 py-0.5 rounded-full text-xs font-semibold shadow-md flex items-center gap-1">
                   <Beaker size={10} /> Gut Health Test
@@ -513,7 +523,7 @@ export default function ProductPage() {
                       alt={`Thumb ${idx + 1}`}
                       width={80}
                       height={80}
-                      className="object-cover w-full h-full"
+                      className="object-contain w-full h-full p-1"
                       unoptimized
                     />
                   </button>
@@ -594,19 +604,28 @@ export default function ProductPage() {
               <span className="text-sm text-[#18606D]">❤️ {likesCount} likes</span>
             </div>
 
-             <div className="flex flex-wrap items-baseline gap-3">
-    <span className="text-2xl sm:text-3xl font-bold text-[#18606D]">
-      ₹{selectedVariantPrice || product.salePrice}
-    </span>
-    <span className="text-sm text-[#94A3B8] line-through">
-      ₹{selectedVariantOriginalPrice || product.originalPrice}
-    </span>
-    {selectedVariantLabel && (
-      <span className="text-xs bg-[#E8F4F7] text-[#18606D] px-2 py-0.5 rounded-full">
-        {selectedVariantLabel}
-      </span>
-    )}
-    </div>
+            {(() => {
+              const displayPrice = selectedVariantPrice !== null ? selectedVariantPrice : product.salePrice;
+              const displayOriginalPrice = selectedVariantOriginalPrice !== null ? selectedVariantOriginalPrice : product.originalPrice;
+              const hasDiscount = displayOriginalPrice && displayPrice && (displayPrice < displayOriginalPrice);
+              return (
+                <div className="flex flex-wrap items-baseline gap-3">
+                  <span className="text-2xl sm:text-3xl font-bold text-[#18606D]">
+                    ₹{hasDiscount ? displayPrice : (displayOriginalPrice || displayPrice)}
+                  </span>
+                  {hasDiscount && (
+                    <span className="text-sm text-[#94A3B8] line-through">
+                      ₹{displayOriginalPrice}
+                    </span>
+                  )}
+                  {selectedVariantLabel && (
+                    <span className="text-xs bg-[#E8F4F7] text-[#18606D] px-2 py-0.5 rounded-full">
+                      {selectedVariantLabel}
+                    </span>
+                  )}
+                </div>
+              );
+            })()}
             <p className="text-xs text-[#64748B]">{product.taxNote}</p>
 
             {product.description && (

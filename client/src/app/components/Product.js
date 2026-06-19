@@ -58,8 +58,12 @@ const ProductCard = ({ product }) => {
           
           {/* Price */}
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-xl font-bold text-[#18606D]">₹{product.salePrice}</span>
-            <span className="text-xs text-[#94A3B8] line-through">₹{product.originalPrice}</span>
+            <span className="text-xl font-bold text-[#18606D]">
+              ₹{product.originalPrice && product.salePrice && product.originalPrice > product.salePrice ? product.salePrice : (product.originalPrice || product.salePrice)}
+            </span>
+            {product.originalPrice && product.salePrice && product.originalPrice > product.salePrice && (
+              <span className="text-xs text-[#94A3B8] line-through">₹{product.originalPrice}</span>
+            )}
           </div>
           
           {/* Consultation specific */}
