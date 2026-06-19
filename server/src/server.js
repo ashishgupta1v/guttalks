@@ -72,7 +72,7 @@ io.on('connection', (socket) => {
 });
 
 
-createAdmin()
+
 app.use(
   "/uploads/products",
   express.static(path.join(process.cwd(), "uploads", "products"))
