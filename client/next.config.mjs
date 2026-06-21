@@ -28,6 +28,16 @@ const nextConfig = {
         port: "5000",
         pathname: "/uploads/**",
       },
+      {
+        protocol: "https",
+        hostname: "api.guttalks.in",
+        pathname: "/uploads/**",
+      },
+      {
+        protocol: "https",
+        hostname: "guttalks.in",
+        pathname: "/uploads/**",
+      },
     ],
   },
   reactCompiler: true,
