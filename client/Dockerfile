@@ -12,14 +12,6 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Pass build arguments for Next.js public variables
-ARG NEXT_PUBLIC_API
-ARG NEXT_PUBLIC_IMAGE_URL
-ARG NEXT_PUBLIC_SOCKET_URL
-
-ENV NEXT_PUBLIC_API=$NEXT_PUBLIC_API
-ENV NEXT_PUBLIC_IMAGE_URL=$NEXT_PUBLIC_IMAGE_URL
-ENV NEXT_PUBLIC_SOCKET_URL=$NEXT_PUBLIC_SOCKET_URL
 
 # Next.js telemetry can be disabled during the build
 ENV NEXT_TELEMETRY_DISABLED=1
